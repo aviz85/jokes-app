@@ -1,10 +1,10 @@
 import React from 'react';
 import { FlatList } from 'react-native';
 import { List, FAB } from 'react-native-paper';
-import { router } from 'expo-router';
-import type { Joke } from '../../src/types/jokes';
+import type { JokeListScreenProps } from '../types/navigation';
+import type { Joke } from '../types/jokes';
 
-export const mockJokes: Joke[] = [
+const mockJokes: Joke[] = [
   {
     id: '1',
     versions: [{ id: '1', content: 'Why did the chicken cross the road?', createdAt: new Date().toISOString() }],
@@ -19,7 +19,7 @@ export const mockJokes: Joke[] = [
   }
 ];
 
-export default function JokeListScreen() {
+export default function JokeListScreen({ navigation }: JokeListScreenProps) {
   return (
     <>
       <FlatList
@@ -27,10 +27,7 @@ export default function JokeListScreen() {
         renderItem={({ item }) => (
           <List.Item
             title={item.versions[0].content}
-            onPress={() => router.push({
-              pathname: '/joke/[id]',
-              params: { id: item.id }
-            })}
+            onPress={() => navigation.navigate('JokeDetail', { joke: item })}
             right={props => <List.Icon {...props} icon="chevron-right" />}
           />
         )}
@@ -44,10 +41,8 @@ export default function JokeListScreen() {
           right: 0,
           bottom: 0,
         }}
-        onPress={() => router.push({
-          pathname: '/joke/new'
-        })}
+        onPress={() => navigation.navigate('EditJoke', {})}
       />
     </>
   );
-}
+} 
