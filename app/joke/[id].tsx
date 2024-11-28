@@ -1,28 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, IconButton, TextInput } from 'react-native-paper';
 import { useLocalSearchParams, router } from 'expo-router';
-import type { Joke, EmojiRating as EmojiRatingType } from '../../src/types/jokes';
-import { mockJokes } from '../(tabs)';
+import type { Joke, JokeVersion, EmojiRating as EmojiRatingType } from '../../src/types/jokes';
 import { EmojiRating } from '../../src/components/EmojiRating';
-
-const getJoke = (id: string): Joke | undefined => 
-  mockJokes.find((joke: Joke) => joke.id === id);
+import { getJoke, updateJokeRating, deleteJoke, createJokeVersion } from '../../src/services/jokes';
 
 export default function JokeScreen() {
   const { id } = useLocalSearchParams();
-  const joke = getJoke(id as string);
+  const [joke, setJoke] = useState<Joke & { joke_versions: JokeVersion[] }>();
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
-  const [rating, setRating] = useState<EmojiRatingType | undefined>(joke?.rating);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
-  
-  if (!joke) return <Text>Joke not found</Text>;
-  
-  const currentVersion = joke.versions[currentVersionIndex];
+
+  useEffect(() => {
+    loadJoke();
+  }, [id]);
+
+  const loadJoke = async () => {
+    if (!id) return;
+    try {
+      const data = await getJoke(Number(id));
+      setJoke(data);
+    } catch (error) {
+      console.error('Failed to load joke:', error);
+    }
+  };
+
+  if (!joke || !joke.joke_versions) return <Text>Loading...</Text>;
+
+  const currentVersion = joke.joke_versions?.[currentVersionIndex];
+
+  const handleRating = async (rating: EmojiRatingType) => {
+    try {
+      await updateJokeRating(joke.id, rating);
+      await loadJoke();
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+  };
 
   const startEditing = () => {
-    setEditedContent(currentVersion.content);
+    setEditedContent(currentVersion?.text || '');
     setIsEditing(true);
   };
 
@@ -75,7 +94,7 @@ export default function JokeScreen() {
                 onSubmitEditing={dismissKeyboard}
               />
             ) : (
-              <Text variant="headlineMedium">{currentVersion.content}</Text>
+              <Text variant="headlineMedium">{currentVersion?.text}</Text>
             )}
           </View>
 
@@ -88,18 +107,18 @@ export default function JokeScreen() {
                   disabled={currentVersionIndex === 0}
                 />
                 <Text variant="bodyMedium">
-                  Version {currentVersionIndex + 1} of {joke.versions.length}
+                  Version {currentVersionIndex + 1} of {joke.joke_versions?.length}
                 </Text>
                 <IconButton
                   icon="chevron-right"
-                  onPress={() => setCurrentVersionIndex(prev => Math.min(joke.versions.length - 1, prev + 1))}
-                  disabled={currentVersionIndex === joke.versions.length - 1}
+                  onPress={() => setCurrentVersionIndex(prev => Math.min(joke.joke_versions?.length - 1 || 0, prev + 1))}
+                  disabled={currentVersionIndex === joke.joke_versions?.length - 1}
                 />
               </View>
 
               <View style={styles.viewActions}>
                 <View style={styles.actionItem}>
-                  <EmojiRating value={rating} onChange={setRating} />
+                  <EmojiRating value={joke.rating} onChange={handleRating} />
                   <Text variant="labelSmall">Rate</Text>
                 </View>
                 <View style={styles.actionItem}>

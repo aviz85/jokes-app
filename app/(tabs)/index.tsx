@@ -1,40 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList } from 'react-native';
 import { List, FAB } from 'react-native-paper';
 import { router } from 'expo-router';
 import type { Joke } from '../../src/types/jokes';
-
-export const mockJokes: Joke[] = [
-  {
-    id: '1',
-    versions: [{ id: '1', content: 'Why did the chicken cross the road?', createdAt: new Date().toISOString() }],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    versions: [{ id: '1', content: 'What do you call a bear with no teeth?', createdAt: new Date().toISOString() }],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-];
+import { getJokes } from '../../src/services/jokes';
 
 export default function JokeListScreen() {
+  const [jokes, setJokes] = useState<Joke[]>([]);
+
+  useEffect(() => {
+    loadJokes();
+  }, []);
+
+  const loadJokes = async () => {
+    try {
+      const data = await getJokes();
+      setJokes(data);
+    } catch (error) {
+      console.error('Failed to load jokes:', error);
+    }
+  };
+
   return (
     <>
       <FlatList
-        data={mockJokes}
+        data={jokes}
         renderItem={({ item }) => (
           <List.Item
-            title={item.versions[0].content}
+            title={item.original}
             onPress={() => router.push({
               pathname: '/joke/[id]',
-              params: { id: item.id }
+              params: { id: item.id.toString() }
             })}
             right={props => <List.Icon {...props} icon="chevron-right" />}
           />
         )}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id.toString()}
       />
       <FAB
         icon="plus"

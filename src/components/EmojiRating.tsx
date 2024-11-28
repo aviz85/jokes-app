@@ -11,7 +11,7 @@ const EMOJI_RATINGS = [
 ];
 
 type Props = {
-  value?: EmojiRatingType;
+  value?: EmojiRatingType | null;
   onChange: (rating: EmojiRatingType) => void;
 };
 

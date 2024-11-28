@@ -4,7 +4,7 @@ import { TextInput, Button } from 'react-native-paper';
 import type { EditJokeScreenProps } from '../types/navigation';
 
 export default function EditJokeScreen({ navigation, route }: EditJokeScreenProps) {
-  const [content, setContent] = React.useState(route.params.joke?.versions[0]?.content || '');
+  const [content, setContent] = React.useState(route.params.joke?.joke_versions?.[0]?.text || '');
 
   return (
     <View style={{ padding: 16 }}>

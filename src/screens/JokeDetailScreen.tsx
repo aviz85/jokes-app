@@ -15,10 +15,15 @@ type Props = {
 export default function JokeDetailScreen({ route, navigation }: Props) {
   const { joke } = route.params;
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
-  const currentVersion = joke.versions[currentVersionIndex];
+  
+  if (!joke.joke_versions?.length) {
+    return <Text>No versions available</Text>;
+  }
+
+  const currentVersion = joke.joke_versions[currentVersionIndex];
 
   const handleNextVersion = () => {
-    if (currentVersionIndex < joke.versions.length - 1) {
+    if (currentVersionIndex < joke.joke_versions!.length - 1) {
       setCurrentVersionIndex(prev => prev + 1);
     }
   };
@@ -33,7 +38,7 @@ export default function JokeDetailScreen({ route, navigation }: Props) {
     <Surface style={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Text variant="bodyLarge">{currentVersion.content}</Text>
+          <Text variant="bodyLarge">{currentVersion.text}</Text>
         </Card.Content>
         <Card.Actions>
           <IconButton
@@ -42,12 +47,12 @@ export default function JokeDetailScreen({ route, navigation }: Props) {
             disabled={currentVersionIndex === 0}
           />
           <Text variant="bodyMedium">
-            Version {currentVersionIndex + 1} of {joke.versions.length}
+            Version {currentVersionIndex + 1} of {joke.joke_versions.length}
           </Text>
           <IconButton
             icon="chevron-right"
             onPress={handleNextVersion}
-            disabled={currentVersionIndex === joke.versions.length - 1}
+            disabled={currentVersionIndex === joke.joke_versions.length - 1}
           />
         </Card.Actions>
       </Card>
