@@ -20,42 +20,38 @@ export async function getJoke(id: number) {
     .from('jokes')
     .select(`
       *,
-      joke_versions(*)
+      joke_versions (
+        id,
+        text,
+        type,
+        timestamp,
+        created_at
+      )
     `)
     .eq('id', id)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching joke:', error);
+    throw error;
+  }
+
+  console.log('Fetched joke:', joke);
   return joke as Joke & { joke_versions: JokeVersion[] };
 }
 
 export async function createJoke(text: string) {
   const { data: joke, error: jokeError } = await supabase
     .from('jokes')
-    .insert([
-      { 
-        original: text,
-        status: 'active',
-        is_deleted: false 
-      }
-    ])
+    .insert([{ 
+      original: text,
+      status: 'active',
+      is_deleted: false 
+    }])
     .select()
     .single();
 
   if (jokeError) throw jokeError;
-
-  const { error: versionError } = await supabase
-    .from('joke_versions')
-    .insert([
-      {
-        joke_id: joke.id,
-        text,
-        type: 'original',
-        timestamp: new Date().toISOString()
-      }
-    ]);
-
-  if (versionError) throw versionError;
 
   return joke;
 }
@@ -63,14 +59,12 @@ export async function createJoke(text: string) {
 export async function createJokeVersion(jokeId: number, text: string) {
   const { error } = await supabase
     .from('joke_versions')
-    .insert([
-      {
-        joke_id: jokeId,
-        text,
-        type: 'variation',
-        timestamp: new Date().toISOString()
-      }
-    ]);
+    .insert([{
+      joke_id: jokeId,
+      text,
+      type: 'variation',
+      timestamp: new Date().toISOString()
+    }]);
 
   if (error) throw error;
 }

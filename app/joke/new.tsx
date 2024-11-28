@@ -3,6 +3,12 @@ import { StyleSheet, View, Platform, KeyboardAvoidingView } from 'react-native';
 import { Text, IconButton, TextInput } from 'react-native-paper';
 import { router } from 'expo-router';
 
+const translations = {
+  save: 'שמור',
+  cancel: 'ביטול',
+  placeholder: 'כתוב את הבדיחה כאן...',
+};
+
 export default function NewJokeScreen() {
   const [content, setContent] = useState('');
 
@@ -16,34 +22,32 @@ export default function NewJokeScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <View style={styles.container}>
+      <View style={[styles.container, { direction: 'rtl' }]}>
+        <TextInput
+          mode="outlined"
+          value={content}
+          onChangeText={setContent}
+          multiline
+          style={[styles.editInput, { textAlign: 'right' }]}
+          autoFocus
+          placeholder={translations.placeholder}
+          textAlign="right"
+        />
         <View style={styles.actions}>
           <View style={styles.actionItem}>
             <IconButton
               icon="check"
               onPress={saveJoke}
             />
-            <Text variant="labelSmall">Save</Text>
+            <Text variant="labelSmall">{translations.save}</Text>
           </View>
           <View style={styles.actionItem}>
             <IconButton
               icon="close"
               onPress={() => router.back()}
             />
-            <Text variant="labelSmall">Cancel</Text>
+            <Text variant="labelSmall">{translations.cancel}</Text>
           </View>
-        </View>
-
-        <View style={styles.jokeContent}>
-          <TextInput
-            mode="outlined"
-            value={content}
-            onChangeText={setContent}
-            multiline
-            style={styles.editInput}
-            autoFocus
-            placeholder="Write your joke here..."
-          />
         </View>
       </View>
     </KeyboardAvoidingView>

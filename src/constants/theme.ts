@@ -1,11 +1,10 @@
-import { MD3LightTheme, configureFonts } from 'react-native-paper';
+import { MD3LightTheme } from 'react-native-paper';
 
 export const theme = {
   ...MD3LightTheme,
+  isV3: true,
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#6750A4',
-    secondary: '#625B71',
-  },
-  // נוסיף custom tokens לפי הצורך
+    // Add any custom colors here
+  }
 }; 
